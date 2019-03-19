@@ -52,7 +52,7 @@ def statistic(s):
     return d
 
 
-def give_caeser(code, str1, key):
+def give_caesar(code, str1, key):
     res = ""
     for i in range(str1.__len__()):
         if alf.find(str1[i]) != -1:
@@ -62,8 +62,8 @@ def give_caeser(code, str1, key):
     return res
 
 
-def caeser(code, args):
-    res = give_caeser(code, read(args.input_file), int(args.key))
+def caesar(code, args):
+    res = give_caesar(code, read(args.input_file), int(args.key))
     write(args.output_file, res)
 
 
@@ -82,15 +82,15 @@ def vigenere(code, args):
 
 
 def encode(args):
-    if args.cipher == 'caeser':
-        caeser('encode', args)
+    if args.cipher == 'caesar':
+        caesar('encode', args)
     else:
         vigenere('encode', args)
 
 
 def decode(args):
-    if args.cipher == 'caeser':
-        caeser('decode', args)
+    if args.cipher == 'caesar':
+        caesar('decode', args)
     else:
         vigenere('decode', args)
 
@@ -109,7 +109,7 @@ def hack(args):
     d = give_dict(args.model_file)
     res = ''
     for i in range(26):
-        s1 = give_caeser('decode', s, i)
+        s1 = give_caesar('decode', s, i)
         d1 = statistic(s1)
         dist = 0
         for j in range(52):
