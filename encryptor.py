@@ -12,8 +12,9 @@ def find(code, symvol):
     else:
         return 26 - alf.find(symvol)
 
+
 def read(file):
-    if file == sys.stdin:
+    if file == 'sys.stdin':
         return input()
     else:
         with open(file, 'r') as f:
@@ -21,7 +22,7 @@ def read(file):
 
 
 def write(file, res):
-    if file == sys.stdout:
+    if file == 'sys.stdout':
         print(res)
     else:
         with open(file, 'w') as f:
