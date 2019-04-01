@@ -2,15 +2,17 @@
 import argparse
 import sys
 import string
+import collections
+import time
 
-alf = 'abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ'
+alf = string.ascii_lowercase * 2 + string.ascii_uppercase * 2
 
 
-def find(code, symvol):
+def find(code, symbol):
     if code == 'encode':
-        return alf.find(symvol)
+        return alf.find(symbol)
     else:
-        return 26 - alf.find(symvol)
+        return string.ascii_lowercase.__len__() - alf.find(symbol)
 
 
 def read(file):
@@ -29,24 +31,27 @@ def write(file, res):
             f.write(res)
 
 
-def give_dict(file):
+def model_to_statistic(file):
+    """
+    This function returns symbol statistics by modul file
+    :param file:
+    :return:
+    """
     d = dict()
     with open(file, 'r') as f:
-        for i in range(52):
+        for i in range(string.ascii_letters.__len__()):
             line = f.readline()
             d[string.ascii_letters[i]] = float(line[:-1])
     return d
 
 
 def statistic(s):
-    d = dict()
+    d = collections.Counter()
     sum = 0
-    for x in alf:
-        d[x] = 0
     for i in s:
         if i in alf:
             sum += 1
-            d[i] = d[i] + 1
+            d[i] += 1
     for i in string.ascii_letters:
         d[i] /= sum
     return d
@@ -105,18 +110,17 @@ def train(args):
 
 def hack(args):
     s = read(args.input_file)
-    min = 100
-    d = give_dict(args.model_file)
+    local_min = float("inf")
+    d = model_to_statistic(args.model_file)
     res = ''
-    for i in range(26):
-        s1 = give_caesar('decode', s, i)
+    for i in string.ascii_lowercase:
+        s1 = give_caesar('decode', s, alf.find(i))
         d1 = statistic(s1)
         dist = 0
-        for j in range(52):
-            c = string.ascii_letters[j]
+        for c in string.ascii_letters:
             dist += abs(d[c] - d1[c])
-        if dist < min:
-            min = dist
+        if dist < local_min:
+            local_min = dist
             res = s1
     write(args.output_file, res)
 
