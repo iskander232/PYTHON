@@ -12,7 +12,7 @@ def find(code, symbol):
     if code == 'encode':
         return alf.find(symbol)
     else:
-        return string.ascii_lowercase.__len__() - alf.find(symbol)
+        return len(string.ascii_lowercase) - alf.find(symbol)
 
 
 def read(file):
@@ -39,7 +39,7 @@ def model_to_statistic(file):
     """
     d = dict()
     with open(file, 'r') as f:
-        for i in range(string.ascii_letters.__len__()):
+        for i in range(len(string.ascii_letters)):
             line = f.readline()
             d[string.ascii_letters[i]] = float(line[:-1])
     return d
@@ -59,7 +59,7 @@ def statistic(s):
 
 def give_caesar(code, str1, key):
     res = ""
-    for i in range(str1.__len__()):
+    for i in range(len(str1)):
         if alf.find(str1[i]) != -1:
             res += (alf[alf.find(str1[i]) + find(code, alf[key])])
         else:
@@ -75,10 +75,10 @@ def caesar(code, args):
 def vigenere(code, args):
     str1 = read(args.input_file)
     key1 = ""
-    while key1.__len__() < str1.__len__():
+    while len(key1) < len(str1):
         key1 += args.key
     res = ""
-    for i in range(str1.__len__()):
+    for i in range(len(str1)):
         if alf.find(str1[i]) != -1:
             res += alf[alf.find(str1[i]) + find(code, key1[i])]
         else:
