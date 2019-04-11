@@ -46,25 +46,23 @@ def model_to_statistic(file):
 
 
 def statistic(s):
-    d = collections.Counter()
-    sum = 0
-    for i in s:
-        if i in alf:
-            sum += 1
-            d[i] += 1
+    d = collections.Counter((ch for ch in s if ch in alf))
+    sum1 = 0
+    for i in alf:
+        sum1 += d[i]
     for i in string.ascii_letters:
-        d[i] /= sum
+        d[i] /= sum1
     return d
 
 
 def give_caesar(code, str1, key):
-    res = ""
+    res = []
     for i in range(len(str1)):
         if alf.find(str1[i]) != -1:
-            res += (alf[alf.find(str1[i]) + find(code, alf[key])])
+            res.append((alf[alf.find(str1[i]) + find(code, alf[key])]))
         else:
-            res += str1[i]
-    return res
+            res.append(str1[i])
+    return ''.join(map(str, res))
 
 
 def caesar(code, args):
@@ -74,16 +72,15 @@ def caesar(code, args):
 
 def vigenere(code, args):
     str1 = read(args.input_file)
-    key1 = ""
-    while len(key1) < len(str1):
-        key1 += args.key
-    res = ""
+    attitude = (len(str1) + len(args.key)) // len(args.key)
+    key1 = args.key * attitude
+    res = []
     for i in range(len(str1)):
         if alf.find(str1[i]) != -1:
-            res += alf[alf.find(str1[i]) + find(code, key1[i])]
+            res.append(alf[alf.find(str1[i]) + find(code, key1[i])])
         else:
-            res += str1[i]
-    write(args.output_file, res)
+            res.append(str1[i])
+    write(args.output_file, ''.join(map(str, res)))
 
 
 def encode(args):
@@ -102,10 +99,11 @@ def decode(args):
 
 def train(args):
     d = statistic(read(args.input_file))
-    res = ''
+    res = []
     for i in string.ascii_letters:
-        res += str(d[i]) + "\n"
-    write(args.model_file, res)
+        res.append(str(d[i]))
+        res.append("\n")
+    write(args.model_file, ''.join(map(str, res)))
 
 
 def hack(args):
@@ -113,16 +111,16 @@ def hack(args):
     local_min = float("inf")
     d = model_to_statistic(args.model_file)
     res = ''
+    s1 = give_caesar('decode', s, 0)
+    d1 = statistic(s1)
     for i in string.ascii_lowercase:
-        s1 = give_caesar('decode', s, alf.find(i))
-        d1 = statistic(s1)
         dist = 0
         for c in string.ascii_letters:
-            dist += abs(d[c] - d1[c])
+            dist += abs(d[alf[alf.find(i) + alf.find(c)]] - d1[c])
         if dist < local_min:
             local_min = dist
-            res = s1
-    write(args.output_file, res)
+            res = i
+    write(args.output_file, give_caesar('encode', s1, string.ascii_lowercase.find(res)))
 
 
 parser = argparse.ArgumentParser()
