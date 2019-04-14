@@ -6,8 +6,8 @@ import collections
 import time
 
 alf = string.ascii_lowercase * 2 + string.ascii_uppercase * 2
-
-
+lowercase_set = set(string.ascii_lowercase)
+alf_set = set(string.ascii_letters)
 def find(code, symbol):
     if code == 'encode':
         return alf.find(symbol)
@@ -46,7 +46,7 @@ def model_to_statistic(file):
 
 
 def statistic(s):
-    d = collections.Counter((ch for ch in s if ch in alf))
+    d = collections.Counter((ch for ch in s if ch in alf_set))
     sum1 = 0
     for i in alf:
         sum1 += d[i]
