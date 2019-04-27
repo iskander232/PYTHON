@@ -1,9 +1,10 @@
 from peewee import *
 from datetime import *
+from config import *
 
-host = 'localhost'
-db = PostgresqlDatabase(database="postgres", user="postgres", password="123", host=host)
+db = PostgresqlDatabase(database=database, user=user, password=password, host=host)
 db.post_number = 1
+
 
 class Post(Model):
     post = CharField()
