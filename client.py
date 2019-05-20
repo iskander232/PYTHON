@@ -1,65 +1,62 @@
-from datetime import *
 import requests
 import json
 from datetime import datetime
+from config_client import path
 
-path = 'http://127.0.0.1:5000/'
-
-help_of_all = '''Напиши post, чтобы создать новую запись,
-напиши find чтобы посмотреть старые записи,
+help_of_all = '''Напиши /post, чтобы создать новую запись,
+напиши /find чтобы посмотреть старые записи,
 напиши help, чтобы увидеть это сообщение,
-напиши quit() чтобы выйти из программы.
+напиши /quit чтобы выйти из программы.
 '''
 
 
 def post():
     help_post = '''Начни печатать сообщение.
-    Чтобы закончить печатать напиши exit() с новой строки,
-     если ты передумал отправлять сообщение и done(),
+    Чтобы закончить печатать напиши /exit с новой строки,
+     если ты передумал отправлять сообщение и /done,
      если это все твое сообщение.
     '''
-    print (help_post)
+    print(help_post)
     s = input()
     text = []
-    while s != 'exit()' and s != 'done()':
-        text.append('\n')
-        text.append(s)
+    while s != '/exit' and s != '/done':
+        text.append('\n' + s)
         s = input()
-    if (s == 'exit()'):
-        print (help_of_all)
-    elif s == 'done()':
-        print('''Напиши название для твоего поста, или 'zzz', тогда он назовется untitled.''')
+    if (s == '/exit'):
+        print(help_of_all)
+    elif s == '/done':
+        print('''Напиши название для твоего поста, или нажми ENTER, тогда он назовется untitled.''')
         name = input()
-        if name == 'zzz':
+        if name == '':
             name = 'untitled'
         requests.post(path + 'post', params={'post': ''.join(text), 'name': name})
     else:
         post()
 
 
-print ('Hello, user')
-print (help_of_all)
+print('Hello, user')
+print(help_of_all)
 s = input()
 
 
 def print_posts(posts):
-    if posts == []:
+    if len(posts) == 0:
         print('Ничего не найдено')
     else:
+        posts_2 = []
         for post in posts:
-            print(post['post'])
-            print('''name : {},
-date : {},
-number : {} '''.format(post['name'], post['date'], post['number']))
-            print('\n\n')
+            posts_2.append(post['post'] + '\n' +
+                           '''name : {}, date : {}, number : {} '''.format
+                           (post['name'], post['date'], post['number']) + '\n\n')
+        print(''.join(posts_2))
 
 
 def find():
     help_find = '''Напиши 1, если хочешь увидеть все записи, 
-    2, если хочешь увидеть записи с номерами в определенном промежутке,
-    3, усли хочешь увидеть записи в определенном времянном промежутке,
-    4, если хочешь увидеть записи с определенным именем
-    quit(), если хочешь закончить'''
+2, если хочешь увидеть записи с номерами в определенном промежутке,
+3, усли хочешь увидеть записи в определенном времянном промежутке,
+4, если хочешь увидеть записи с определенным именем
+/quit, если хочешь закончить'''
     print(help_find)
     x = input()
     if x == '1':
@@ -70,10 +67,10 @@ def find():
         find_with_date()
     elif x == '4':
         find_with_name()
-    elif x == 'quit()':
+    elif x == '/quit':
         return
     else:
-        print ('Плохая команда' + '\n\n\n')
+        print('Плохая команда' + '\n\n\n')
         find()
 
 
@@ -82,85 +79,78 @@ def find_all():
     print_posts(posts)
 
 
-def find_with_num():
-    print('''Напиши, начиная с какого номера ты хочешь увидеть посты или quit(), если передумал''')
-    min_num = input()
-    if min_num == 'quit':
-        return
-    no_errors = True
+def processing_num(str_num, text):
+    print(text)
+    if str_num == '/quit':
+        return True
     try:
-        min_num = int(min_num)
-    except BaseException:
-        no_errors = False
-    if no_errors:
-        print('''Напиши, до какого номера ты хочешь увидеть посты, или quit(), если передумал''')
-        max_num = input()
-        if max_num == 'quit':
-            return
-        try:
-            max_num = int(min_num)
-        except BaseException:
-            no_errors = False
-    if no_errors:
+        return int(str_num)
+    except ValueError:
+        return False
+
+
+def find_with_num():
+    template = '''Напиши, {} какого номера ты хочешь увидеть посты или /quit, если передумал'''
+    min_num = processing_num(input(), template.format('начиная с'))
+    if not isinstance(min_num, bool):
+        max_num = processing_num(input(), template.format('до'))
+    else:
+        max_num = min_num
+    if min_num is True or max_num is True:
+        return
+    elif min_num is False or max_num is False:
+        print('Неудача, попытайся снова')
+        find_with_num()
+    else:
         posts = json.loads(requests.get(path + 'num', params={'min_num': min_num, 'max_num': max_num}).text)
         print_posts(posts)
+
+
+def processing_date(text):
+    print(text)
+    str_date = input()
+    if (str_date == '/quit'):
+        return True
+    if len(str_date.split(' ')) != 3:
+        return False
     else:
-        print ('Неудача')
+        try:
+            return str_date
+        except TypeError:
+            return False
 
 
 def find_with_date():
-    print('''Напиши, начиная с какой даты ты хочешь увидеть посты,
-с новой строки введи год,  месяц, число, и все это разделенное пробелом, или quit(), если передумал.''')
-    no_errors = True
-    min_date = input()
-    x_from = min_date.split(' ')
-    if min_date == 'quit()':
-        return
-    if len(x_from) != 3:
-        no_errors = False
+    template = '''Напиши, {} какой даты ты хочешь увидеть посты,
+с новой строки введи год,  месяц, число, и все это разделенное пробелом, или /quit, если передумал.'''
+    min_date = processing_date(template.format('начиная с'))
+    if not isinstance(min_date, bool):
+        max_date = processing_date(template.format('до'))
     else:
-        try:
-            max_date = datetime(int(x_from[0]), int(x_from[1]), int(x_from[2]))
-        except BaseException:
-            no_errors = False
-    if not no_errors:
-        print('Неверные данные.')
+        max_date = min_date
+    if max_date is True or min_date is True:
+        return
+    elif min_date is False or max_date is False:
+        print('Неудача, попытайся снова')
         find_with_date()
-    if no_errors:
-        print('''Напиши, до какой даты ты хочешь увидеть посты,
-с новой строки введи год,  месяц, число, и все это разделенное пробелом, или quit(), если передумал.''')
-        max_date = input()
-        x_to = max_date.split(' ')
-        if max_date == 'quit()':
-            return
-        if len(x_to) != 3:
-            no_errors = False
-        else:
-            try:
-                datetime(int(x_to[0]), int(x_to[1]), int(x_to[2]))
-            except BaseException:
-                no_errors = False
-    if no_errors:
+    else:
         posts = json.loads(requests.get(path + 'time', params={'min_date': min_date, 'max_date': max_date}).text)
         print_posts(posts)
-    else:
-        print('Неверные данные.')
-        find_with_date()
 
 
 def find_with_name():
-    print('''Введи название, посты с каким именем ты хочешь видеть или quit(), если хочешь вернуться''')
+    print('''Введи название, посты с каким именем ты хочешь видеть или /quit, если хочешь вернуться''')
     name = input()
-    if name == 'quit()':
+    if name == '/quit':
         return
     posts = json.loads(requests.get(path + 'name', params={'name': name}).text)
     print_posts(posts)
 
 
-while s != 'quit()':
-    if s == 'post':
+while s != '/quit':
+    if s == '/post':
         post()
-    elif s == 'find':
+    elif s == '/find':
         find()
     print(help_of_all)
     s = input()
