@@ -7,6 +7,8 @@ import time
 
 alf = string.ascii_lowercase * 2
 alf_set = set(string.ascii_letters)
+
+
 def find(code, symbol):
     if code == 'encode':
         return alf.find(symbol)
