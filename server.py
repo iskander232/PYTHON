@@ -42,7 +42,7 @@ def post():
 
 
 def main():
-    app.run()
+    app.run(port=port, host=host)
 
 
 if __name__ == '__main__':
